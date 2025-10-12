@@ -124,8 +124,9 @@ const App: React.FC = () => {
       // Otherwise, reset the timer for the current step and start it automatically.
       setTimeLeft(steps[currentStepIndex].duration);
       setIsActive(true);
+      speak(steps[currentStepIndex].name);
     }
-  }, [isCompleted, steps, currentStepIndex]);
+  }, [isCompleted, steps, currentStepIndex, speak]);
 
   const handleNextStep = useCallback(() => {
     if (isCompleted) return;
