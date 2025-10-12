@@ -4,15 +4,16 @@ import { MEDITATION_STEPS as DEFAULT_MEDITATION_STEPS, BELL_SOUND_B64 } from './
 import Timer from './components/Timer';
 import StepListItem from './components/StepListItem';
 import Controls from './components/Controls';
-import VolumeControl from './components/VolumeControl';
+import HomeScreen from './components/HomeScreen';
 
 const App: React.FC = () => {
+  const [appState, setAppState] = useState<'home' | 'practice'>('home');
+
   const [steps, setSteps] = useState<MeditationStep[]>(() => {
     try {
       const savedSteps = localStorage.getItem('meditation-steps');
       return savedSteps ? JSON.parse(savedSteps) : DEFAULT_MEDITATION_STEPS;
     } catch {
-      // Fix: Corrected typo in variable name.
       return DEFAULT_MEDITATION_STEPS;
     }
   });
@@ -21,15 +22,7 @@ const App: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(steps[0].duration);
   const [isActive, setIsActive] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
-  const [volume, setVolume] = useState(() => {
-    try {
-      const savedVolume = localStorage.getItem('meditation-volume');
-      return savedVolume !== null ? JSON.parse(savedVolume) : 0.5;
-    } catch {
-      return 0.5;
-    }
-  });
-
+  
   const audioRef = useRef<HTMLAudioElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -45,7 +38,6 @@ const App: React.FC = () => {
     setSteps(currentSteps => {
         const updatedSteps = [...currentSteps];
         updatedSteps[index] = { ...updatedSteps[index], duration: newDurationInSeconds };
-        // If the updated step is the current one and the timer is not running, update timeLeft
         if (index === currentStepIndex && !isActive) {
             setTimeLeft(newDurationInSeconds);
         }
@@ -54,14 +46,12 @@ const App: React.FC = () => {
   }, [currentStepIndex, isActive]);
 
 
-  // Memoized speech function
   const speak = useCallback((text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     window.speechSynthesis.speak(utterance);
   }, []);
 
-  // Effect for the main timer logic
   useEffect(() => {
     if (isActive && !isCompleted) {
       intervalRef.current = setInterval(() => {
@@ -100,15 +90,6 @@ const App: React.FC = () => {
     };
   }, [isActive, currentStepIndex, isCompleted, speak, steps]);
   
-  // Effect to update audio volume and save to localStorage
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = volume;
-    }
-    localStorage.setItem('meditation-volume', JSON.stringify(volume));
-  }, [volume]);
-  
-  // Effect to clean up speech synthesis on unmount
   useEffect(() => {
     return () => window.speechSynthesis.cancel();
   }, []);
@@ -128,19 +109,23 @@ const App: React.FC = () => {
   }, [isCompleted, isStarted, isActive, speak, steps]);
 
   const handleReset = useCallback(() => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
     window.speechSynthesis.cancel();
-    setCurrentStepIndex(0);
-    setTimeLeft(steps[0].duration);
-    setIsActive(false);
-    setIsStarted(false);
-  }, [steps]);
   
-  const handleVolumeChange = useCallback((newVolume: number) => {
-    setVolume(newVolume);
-  }, []);
+    if (isCompleted) {
+      // If the entire practice is finished, reset back to the very beginning.
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      setCurrentStepIndex(0);
+      setTimeLeft(steps[0].duration);
+      setIsActive(false);
+      setIsStarted(false);
+    } else {
+      // Otherwise, reset the timer for the current step and start it automatically.
+      setTimeLeft(steps[currentStepIndex].duration);
+      setIsActive(true);
+    }
+  }, [isCompleted, steps, currentStepIndex]);
 
   const handleNextStep = useCallback(() => {
     if (isCompleted) return;
@@ -149,6 +134,7 @@ const App: React.FC = () => {
         setCurrentStepIndex(nextStepIndex);
         setTimeLeft(steps[nextStepIndex].duration);
         speak(steps[nextStepIndex].name);
+        setIsActive(true); // Automatically resume/start the next step
     } else {
         setCurrentStepIndex(steps.length);
         setIsActive(false);
@@ -164,8 +150,17 @@ const App: React.FC = () => {
         setCurrentStepIndex(prevStepIndex);
         setTimeLeft(steps[prevStepIndex].duration);
         speak(steps[prevStepIndex].name);
+        setIsActive(true); // Automatically resume/start the previous step
     }
   }, [currentStepIndex, isCompleted, speak, steps]);
+
+  const handleBeginPractice = () => {
+    setAppState('practice');
+  };
+
+  if (appState === 'home') {
+    return <HomeScreen onBegin={handleBeginPractice} />;
+  }
 
   const completionMessage = (
     <div className="text-center h-80 md:h-96 flex flex-col items-center justify-center">
@@ -175,7 +170,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 font-sans">
+    <div className="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 font-sans animate-breathing-bg animate-fade-in">
       <main className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16">
         
         <div className="flex flex-col items-center">
@@ -197,7 +192,6 @@ const App: React.FC = () => {
                 currentStepIndex={currentStepIndex}
                 totalSteps={steps.length}
             />
-            <VolumeControl volume={volume} onVolumeChange={handleVolumeChange} />
         </div>
 
         <div className="w-full max-w-md lg:max-w-sm">
