@@ -24,7 +24,8 @@ const App: React.FC = () => {
   const [isStarted, setIsStarted] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  // FIX: In browser environments, setInterval returns a number, not a NodeJS.Timeout object.
+  const intervalRef = useRef<number | null>(null);
 
   const totalDuration = steps[currentStepIndex]?.duration || 0;
   const currentStep = steps[currentStepIndex];
