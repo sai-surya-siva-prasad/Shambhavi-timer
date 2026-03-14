@@ -6,20 +6,24 @@ import StepListItem from './components/StepListItem';
 import Controls from './components/Controls';
 import HomeScreen from './components/HomeScreen';
 
+const getStepEnabled = (step: MeditationStep): boolean => step.enabled ?? true;
+
 const App: React.FC = () => {
   const [appState, setAppState] = useState<'home' | 'practice'>('home');
 
   const [steps, setSteps] = useState<MeditationStep[]>(() => {
     try {
       const savedSteps = localStorage.getItem('meditation-steps');
-      return savedSteps ? JSON.parse(savedSteps) : DEFAULT_MEDITATION_STEPS;
+      const parsed = savedSteps ? (JSON.parse(savedSteps) as MeditationStep[]) : DEFAULT_MEDITATION_STEPS;
+      // Back-compat: old saved data won't have `enabled`
+      return parsed.map((s) => ({ ...s, enabled: getStepEnabled(s) }));
     } catch {
-      return DEFAULT_MEDITATION_STEPS;
+      return DEFAULT_MEDITATION_STEPS.map((s) => ({ ...s, enabled: getStepEnabled(s) }));
     }
   });
 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(steps[0].duration);
+  const [timeLeft, setTimeLeft] = useState(steps[0]?.duration ?? 0);
   const [isActive, setIsActive] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   
@@ -30,11 +34,12 @@ const App: React.FC = () => {
   const totalDuration = steps[currentStepIndex]?.duration || 0;
   const currentStep = steps[currentStepIndex];
   const isCompleted = currentStepIndex >= steps.length;
+  const hasAnySteps = steps.length > 0;
 
   useEffect(() => {
     localStorage.setItem('meditation-steps', JSON.stringify(steps));
   }, [steps]);
-  
+
   const handleUpdateStepDuration = useCallback((index: number, newDurationInSeconds: number) => {
     setSteps(currentSteps => {
         const updatedSteps = [...currentSteps];
@@ -46,12 +51,21 @@ const App: React.FC = () => {
     });
   }, [currentStepIndex, isActive]);
 
-
   const speak = useCallback((text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     window.speechSynthesis.speak(utterance);
   }, []);
+
+  const handleSelectStartStep = useCallback((index: number) => {
+    if (!steps[index]) return;
+
+    setCurrentStepIndex(index);
+    setTimeLeft(steps[index].duration);
+    if (isActive) {
+      setIsActive(false);
+    }
+  }, [isActive, steps]);
 
   useEffect(() => {
     if (isActive && !isCompleted) {
@@ -65,17 +79,17 @@ const App: React.FC = () => {
             audioRef.current.play().catch(e => console.error("Error playing sound:", e));
           }
 
-          const nextStepIndex = currentStepIndex + 1;
-          if (nextStepIndex < steps.length) {
-            setCurrentStepIndex(nextStepIndex);
-            setTimeout(() => speak(steps[nextStepIndex].name), 400);
-            return steps[nextStepIndex].duration;
-          } else {
-            setCurrentStepIndex(steps.length);
-            setIsActive(false);
-            setTimeout(() => speak("Practice Complete"), 400);
-            return 0;
+          const nextIndex = currentStepIndex + 1;
+          if (nextIndex < steps.length) {
+            setCurrentStepIndex(nextIndex);
+            setTimeout(() => speak(steps[nextIndex].name), 400);
+            return steps[nextIndex].duration;
           }
+
+          setCurrentStepIndex(steps.length);
+          setIsActive(false);
+          setTimeout(() => speak("Practice Complete"), 400);
+          return 0;
         });
       }, 1000);
     } else {
@@ -97,32 +111,31 @@ const App: React.FC = () => {
 
   const handleStartPause = useCallback(() => {
     if (isCompleted) return;
+    if (!hasAnySteps) return;
     if (!isStarted) {
       setIsStarted(true);
-      speak(steps[0].name);
+      const startIdx = currentStepIndex < steps.length ? currentStepIndex : 0;
+      setCurrentStepIndex(startIdx);
+      setTimeLeft(steps[startIdx].duration);
+      speak(steps[startIdx].name);
     }
-    
     if (isActive) {
       window.speechSynthesis.cancel();
     }
-
     setIsActive(prev => !prev);
-  }, [isCompleted, isStarted, isActive, speak, steps]);
+  }, [currentStepIndex, hasAnySteps, isCompleted, isStarted, isActive, speak, steps]);
 
   const handleReset = useCallback(() => {
     window.speechSynthesis.cancel();
-  
     if (isCompleted) {
-      // If the entire practice is finished, reset back to the very beginning.
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
       setCurrentStepIndex(0);
-      setTimeLeft(steps[0].duration);
+      setTimeLeft(steps[0]?.duration ?? 0);
       setIsActive(false);
       setIsStarted(false);
     } else {
-      // Otherwise, reset the timer for the current step and start it automatically.
       setTimeLeft(steps[currentStepIndex].duration);
       setIsActive(true);
       speak(steps[currentStepIndex].name);
@@ -131,29 +144,28 @@ const App: React.FC = () => {
 
   const handleNextStep = useCallback(() => {
     if (isCompleted) return;
-    const nextStepIndex = currentStepIndex + 1;
-    if (nextStepIndex < steps.length) {
-        setCurrentStepIndex(nextStepIndex);
-        setTimeLeft(steps[nextStepIndex].duration);
-        speak(steps[nextStepIndex].name);
-        setIsActive(true); // Automatically resume/start the next step
+    const nextIndex = currentStepIndex + 1;
+    if (nextIndex < steps.length) {
+      setCurrentStepIndex(nextIndex);
+      setTimeLeft(steps[nextIndex].duration);
+      speak(steps[nextIndex].name);
+      setIsActive(true);
     } else {
-        setCurrentStepIndex(steps.length);
-        setIsActive(false);
-        setTimeLeft(0);
-        speak("Practice Complete");
+      setCurrentStepIndex(steps.length);
+      setIsActive(false);
+      setTimeLeft(0);
+      speak("Practice Complete");
     }
   }, [currentStepIndex, isCompleted, speak, steps]);
 
   const handlePreviousStep = useCallback(() => {
     if (isCompleted) return;
-    const prevStepIndex = currentStepIndex - 1;
-    if (prevStepIndex >= 0) {
-        setCurrentStepIndex(prevStepIndex);
-        setTimeLeft(steps[prevStepIndex].duration);
-        speak(steps[prevStepIndex].name);
-        setIsActive(true); // Automatically resume/start the previous step
-    }
+    if (currentStepIndex <= 0) return;
+    const prevIndex = currentStepIndex - 1;
+    setCurrentStepIndex(prevIndex);
+    setTimeLeft(steps[prevIndex].duration);
+    speak(steps[prevIndex].name);
+    setIsActive(true);
   }, [currentStepIndex, isCompleted, speak, steps]);
 
   const handleBeginPractice = () => {
@@ -180,8 +192,8 @@ const App: React.FC = () => {
                 <Timer
                     timeLeft={timeLeft}
                     totalDuration={totalDuration}
-                    stepName={currentStep.name}
-                    stepDescription={currentStep.description}
+                    stepName={currentStep?.name ?? 'No steps selected'}
+                    stepDescription={currentStep?.description ?? 'Select at least one step to begin.'}
                 />
             )}
             <Controls 
@@ -193,6 +205,7 @@ const App: React.FC = () => {
                 onPrevious={handlePreviousStep}
                 currentStepIndex={currentStepIndex}
                 totalSteps={steps.length}
+                hasAnySteps={hasAnySteps}
             />
         </div>
 
@@ -205,15 +218,17 @@ const App: React.FC = () => {
                         index={index}
                         name={step.name}
                         duration={step.duration}
+                        canSelect={true}
                         isActive={!isCompleted && index === currentStepIndex}
                         isCompleted={index < currentStepIndex}
                         onUpdateDuration={handleUpdateStepDuration}
+                        onSelect={handleSelectStartStep}
                     />
                 ))}
             </ul>
              <div className="mt-4 text-center lg:text-left">
                 <p className="text-xs text-gray-500">
-                    <span className="font-bold text-gray-400">Tip:</span> Click the pencil icon to customize step durations.
+                    <span className="font-bold text-gray-400">Tip:</span> Click a step to start from there. Click the pencil icon to customize durations.
                 </p>
             </div>
         </div>

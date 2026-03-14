@@ -3,6 +3,7 @@ import React from 'react';
 interface ControlsProps {
   isActive: boolean;
   isStarted: boolean;
+  hasAnySteps: boolean;
   onStartPause: () => void;
   onReset: () => void;
   onNext: () => void;
@@ -42,7 +43,7 @@ const NextIcon = () => (
 );
 
 
-const Controls: React.FC<ControlsProps> = ({ isActive, isStarted, onStartPause, onReset, onNext, onPrevious, currentStepIndex, totalSteps }) => {
+const Controls: React.FC<ControlsProps> = ({ isActive, isStarted, hasAnySteps, onStartPause, onReset, onNext, onPrevious, currentStepIndex, totalSteps }) => {
   const baseButtonClasses = "transition-transform transform focus:outline-none focus:ring-2 focus:ring-opacity-75 disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none";
   const mainButtonClasses = "w-36 px-6 py-3 font-semibold rounded-full shadow-lg flex items-center justify-center";
   const skipButtonClasses = "w-12 h-12 bg-gray-700 text-white rounded-full flex items-center justify-center hover:bg-gray-600 active:bg-gray-800 focus:ring-gray-500 hover:scale-105";
@@ -58,6 +59,7 @@ const Controls: React.FC<ControlsProps> = ({ isActive, isStarted, onStartPause, 
 
         <button
           onClick={onStartPause}
+          disabled={!hasAnySteps}
           className={`${baseButtonClasses} ${mainButtonClasses} bg-cyan-600 text-white hover:bg-cyan-500 active:bg-cyan-700 focus:ring-cyan-400 hover:scale-105 w-40`}
         >
           {isActive ? <PauseIcon /> : <PlayIcon />}

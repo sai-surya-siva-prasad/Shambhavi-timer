@@ -1,15 +1,15 @@
 import type { MeditationStep } from './types';
 
 export const MEDITATION_STEPS: MeditationStep[] = [
-  { name: 'Patangasana', description: 'Butterfly', duration: 120 },
-  { name: 'Shishupalasana (Right Leg)', description: 'Rock the Baby', duration: 120 },
-  { name: 'Shishupalasana (Left Leg)', description: 'Rock the Baby', duration: 120 },
-  { name: 'Nadi Vibhajan', description: 'Cat Stretch (3 cycles)', duration: 180 },
-  { name: 'Sukha Kriya', description: 'Alternate nostril breathing', duration: 390 },
-  { name: 'AUM Chanting', description: '21 times', duration: 240 },
-  { name: 'Vipareeta Swasa', description: 'Fluttering of breath', duration: 210 },
-  { name: 'Bandas', description: 'Locks (Fullness & Emptiness)', duration: 120 },
-  { name: 'Watching the breath', description: '5-6 mins observation', duration: 330 },
+  { name: 'Patangasana', description: 'Butterfly', duration: 120, enabled: true },
+  { name: 'Shishupalasana (Right Leg)', description: 'Rock the Baby', duration: 120, enabled: true },
+  { name: 'Shishupalasana (Left Leg)', description: 'Rock the Baby', duration: 120, enabled: true },
+  { name: 'Nadi Vibhajan', description: 'Cat Stretch (3 cycles)', duration: 180, enabled: true },
+  { name: 'Sukha Kriya', description: 'Alternate nostril breathing', duration: 390, enabled: true },
+  { name: 'AUM Chanting', description: '21 times', duration: 240, enabled: true },
+  { name: 'Vipareeta Swasa', description: 'Fluttering of breath', duration: 210, enabled: true },
+  { name: 'Bandas', description: 'Locks (Fullness & Emptiness)', duration: 120, enabled: true },
+  { name: 'Watching the breath', description: '5-6 mins observation', duration: 330, enabled: true },
 ];
 
 // A gentle bell sound for transitions, encoded in base64 to avoid external file dependencies.

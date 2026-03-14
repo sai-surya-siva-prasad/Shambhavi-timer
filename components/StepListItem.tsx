@@ -4,9 +4,11 @@ interface StepListItemProps {
   index: number;
   name: string;
   duration: number; // in seconds
+  canSelect: boolean;
   isActive: boolean;
   isCompleted: boolean;
   onUpdateDuration: (index: number, newDurationInSeconds: number) => void;
+  onSelect: (index: number) => void;
 }
 
 const formatDuration = (seconds: number): string => {
@@ -43,7 +45,7 @@ const DotIcon = () => (
 );
 
 
-const StepListItem: React.FC<StepListItemProps> = ({ index, name, duration, isActive, isCompleted, onUpdateDuration }) => {
+const StepListItem: React.FC<StepListItemProps> = ({ index, name, duration, canSelect, isActive, isCompleted, onUpdateDuration, onSelect }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [newDuration, setNewDuration] = useState(String(duration / 60));
     
@@ -90,13 +92,24 @@ const StepListItem: React.FC<StepListItemProps> = ({ index, name, duration, isAc
     const nameTextClasses = isCompleted ? 'text-gray-400 line-through' : isActive ? 'text-white' : 'text-gray-300';
     const durationTextClasses = isCompleted ? 'text-gray-500' : isActive ? 'text-cyan-300' : 'text-gray-400';
 
+    const handleRowClick = () => {
+        if (canSelect) onSelect(index);
+    };
+
     return (
-        <li className={`${baseClasses} ${isActive ? activeClasses : isCompleted ? completedClasses : inactiveClasses}`}>
-            <div className="flex items-center space-x-4">
+        <li
+            role="button"
+            tabIndex={canSelect ? 0 : undefined}
+            onClick={handleRowClick}
+            onKeyDown={(e) => canSelect && (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), handleRowClick())}
+            className={`${baseClasses} ${isActive ? activeClasses : isCompleted ? completedClasses : inactiveClasses} ${canSelect ? 'cursor-pointer' : ''}`}
+            aria-label={canSelect ? `Select ${name}` : name}
+        >
+            <div className="flex items-center space-x-4 flex-1 min-w-0">
                 {getStatusIcon()}
                 <span className={`font-medium ${nameTextClasses}`}>{name}</span>
             </div>
-            <div className="flex items-center space-x-2 group">
+            <div className="flex items-center space-x-2 group" onClick={(e) => e.stopPropagation()}>
                 {isEditing ? (
                     <input
                         type="number"
