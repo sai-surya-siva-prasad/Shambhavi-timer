@@ -5,77 +5,32 @@ interface HomeScreenProps {
 }
 
 /**
- * Ornate lotus with 8 outer petals, 8 inner petals, decorative rings
- * and the sacred Om (ॐ) symbol at the centre.
+ * Minimal symbol: a soft ring with the Om (ॐ) at the centre.
  */
-const OrnateLotus = () => (
-  <div className="relative w-40 h-40 mb-8 animate-subtle-pulse">
-    <svg viewBox="0 0 120 120" className="w-full h-full" aria-hidden="true">
+const OmSymbol = () => (
+  <div className="relative w-36 h-36 mb-8 animate-subtle-pulse flex items-center justify-center">
+    <svg viewBox="0 0 120 120" className="absolute inset-0 w-full h-full" aria-hidden="true">
       <defs>
-        {/* Saffron-to-deep-orange gradient for outer petals */}
-        <radialGradient id="outerPetalGrad" cx="50%" cy="75%" r="65%">
-          <stop offset="0%"   stopColor="#FFAA00" />
-          <stop offset="100%" stopColor="#CC5500" />
-        </radialGradient>
-        {/* Gold gradient for inner petals */}
-        <radialGradient id="innerPetalGrad" cx="50%" cy="75%" r="65%">
-          <stop offset="0%"   stopColor="#FFD700" />
-          <stop offset="100%" stopColor="#FFA500" />
-        </radialGradient>
-        {/* Deep centre gradient */}
-        <radialGradient id="centreGrad" cx="50%" cy="40%" r="70%">
-          <stop offset="0%"   stopColor="#3D1A6E" />
-          <stop offset="100%" stopColor="#1A0B38" />
+        <radialGradient id="ringGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"  stopColor="#FFD700" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#FFD700" stopOpacity="0" />
         </radialGradient>
       </defs>
-
-      {/* Outermost decorative dashed ring */}
-      <circle cx="60" cy="60" r="57" stroke="#FBBF24" strokeWidth="0.6"
-              fill="none" opacity="0.25" strokeDasharray="3 5" />
-      {/* Second decorative ring */}
-      <circle cx="60" cy="60" r="52" stroke="#FF9500" strokeWidth="0.5"
-              fill="none" opacity="0.2" />
-
-      {/* 8 outer petals – teardrop paths rotated 45° apart */}
-      {Array.from({ length: 8 }, (_, i) => (
-        <path
-          key={`op-${i}`}
-          d="M 60,60 C 51,40 49,22 60,10 C 71,22 69,40 60,60"
-          transform={`rotate(${i * 45}, 60, 60)`}
-          fill="url(#outerPetalGrad)"
-          opacity="0.82"
-        />
-      ))}
-
-      {/* 8 inner petals – shorter, offset 22.5° */}
-      {Array.from({ length: 8 }, (_, i) => (
-        <path
-          key={`ip-${i}`}
-          d="M 60,60 C 55,46 54,34 60,26 C 66,34 65,46 60,60"
-          transform={`rotate(${i * 45 + 22.5}, 60, 60)`}
-          fill="url(#innerPetalGrad)"
-          opacity="0.88"
-        />
-      ))}
-
-      {/* Inner glow ring */}
-      <circle cx="60" cy="60" r="18" fill="none" stroke="#FFD700" strokeWidth="0.8" opacity="0.5" />
-
-      {/* Centre circle */}
-      <circle cx="60" cy="60" r="14" fill="url(#centreGrad)" stroke="#FFD700" strokeWidth="1" />
-
-      {/* Om symbol */}
-      <text
-        x="60" y="65"
-        textAnchor="middle"
-        fontSize="14"
-        fill="#FFD700"
-        fontFamily="serif"
-        fontWeight="bold"
-      >
-        ॐ
-      </text>
+      {/* Soft glow fill */}
+      <circle cx="60" cy="60" r="54" fill="url(#ringGlow)" />
+      {/* Single clean ring */}
+      <circle cx="60" cy="60" r="50" fill="none" stroke="#B8860B" strokeWidth="0.8" opacity="0.55" />
+      {/* Slightly inner ring for depth */}
+      <circle cx="60" cy="60" r="44" fill="none" stroke="#FFD700" strokeWidth="0.4" opacity="0.25" />
     </svg>
+    {/* Om glyph in the centre, rendered as text so it scales crisply */}
+    <span
+      className="relative font-cormorant select-none"
+      style={{ fontSize: '4rem', lineHeight: 1, color: '#FFD700',
+               textShadow: '0 0 20px rgba(255,180,0,0.5)' }}
+    >
+      ॐ
+    </span>
   </div>
 );
 
@@ -101,7 +56,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onBegin }) => {
           ॐ नमः शिवाय
         </p>
 
-        <OrnateLotus />
+        <OmSymbol />
 
         {/* Title */}
         <h1 className="font-cinzel text-3xl md:text-4xl font-semibold tracking-widest"
