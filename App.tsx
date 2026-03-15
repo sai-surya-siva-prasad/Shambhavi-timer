@@ -51,6 +51,19 @@ const App: React.FC = () => {
     });
   }, [currentStepIndex, isActive]);
 
+  /** Play the bell sound `count` times, `gapMs` apart. */
+  const playBellTimes = useCallback((count: number, gapMs = 1400) => {
+    const ring = (remaining: number) => {
+      if (remaining <= 0 || !audioRef.current) return;
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(e => console.error('Bell error:', e));
+      if (remaining > 1) {
+        setTimeout(() => ring(remaining - 1), gapMs);
+      }
+    };
+    ring(count);
+  }, []);
+
   const speak = useCallback((text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -75,20 +88,23 @@ const App: React.FC = () => {
             return prevTime - 1;
           }
           
-          if (audioRef.current) {
-            audioRef.current.play().catch(e => console.error("Error playing sound:", e));
-          }
-
           const nextIndex = currentStepIndex + 1;
           if (nextIndex < steps.length) {
+            // Single bell for a regular step transition
+            if (audioRef.current) {
+              audioRef.current.currentTime = 0;
+              audioRef.current.play().catch(e => console.error("Bell error:", e));
+            }
             setCurrentStepIndex(nextIndex);
             setTimeout(() => speak(steps[nextIndex].name), 400);
             return steps[nextIndex].duration;
           }
 
+          // Triple bell for end-of-practice
+          playBellTimes(3, 1400);
           setCurrentStepIndex(steps.length);
           setIsActive(false);
-          setTimeout(() => speak("Practice Complete"), 400);
+          setTimeout(() => speak("Practice Complete"), 5000); // after bells finish
           return 0;
         });
       }, 1000);
@@ -103,7 +119,7 @@ const App: React.FC = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, currentStepIndex, isCompleted, speak, steps]);
+  }, [isActive, currentStepIndex, isCompleted, speak, steps, playBellTimes]);
   
   useEffect(() => {
     return () => window.speechSynthesis.cancel();
