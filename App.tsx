@@ -138,7 +138,13 @@ const App: React.FC = () => {
       return next;
     });
     if (isActive) setIsActive(false);
-  }, [isActive, steps]);
+    // Voice on → announce step name; voice off → play bell
+    if (voiceEnabledRef.current) {
+      speak(steps[index].name);
+    } else {
+      playBellTimes(1);
+    }
+  }, [isActive, steps, speak, playBellTimes]);
 
   useEffect(() => {
     if (isActive && !isCompleted) {
