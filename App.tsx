@@ -138,11 +138,10 @@ const App: React.FC = () => {
       return next;
     });
     if (isActive) setIsActive(false);
-    // Voice on → announce step name; voice off → play bell
+    // Always play bell; additionally speak step name when voice is on
+    playBellTimes(1);
     if (voiceEnabledRef.current) {
       speak(steps[index].name);
-    } else {
-      playBellTimes(1);
     }
   }, [isActive, steps, speak, playBellTimes]);
 
