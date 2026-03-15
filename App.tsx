@@ -26,6 +26,8 @@ const App: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(steps[0]?.duration ?? 0);
   const [isActive, setIsActive] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
+  // Only steps whose timer ran to zero — manual navigation does NOT mark steps complete
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   
   const audioRef = useRef<HTMLAudioElement>(null);
   // FIX: In browser environments, setInterval returns a number, not a NodeJS.Timeout object.
@@ -51,6 +53,19 @@ const App: React.FC = () => {
     });
   }, [currentStepIndex, isActive]);
 
+  /** Play the bell sound `count` times, `gapMs` apart. */
+  const playBellTimes = useCallback((count: number, gapMs = 1400) => {
+    const ring = (remaining: number) => {
+      if (remaining <= 0 || !audioRef.current) return;
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(e => console.error('Bell error:', e));
+      if (remaining > 1) {
+        setTimeout(() => ring(remaining - 1), gapMs);
+      }
+    };
+    ring(count);
+  }, []);
+
   const speak = useCallback((text: string) => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
@@ -62,6 +77,12 @@ const App: React.FC = () => {
 
     setCurrentStepIndex(index);
     setTimeLeft(steps[index].duration);
+    // Un-complete any steps from this index onward (user is re-doing them)
+    setCompletedSteps(prev => {
+      const next = new Set(prev);
+      for (let i = index; i < steps.length; i++) next.delete(i);
+      return next;
+    });
     if (isActive) {
       setIsActive(false);
     }
@@ -75,20 +96,26 @@ const App: React.FC = () => {
             return prevTime - 1;
           }
           
-          if (audioRef.current) {
-            audioRef.current.play().catch(e => console.error("Error playing sound:", e));
-          }
-
           const nextIndex = currentStepIndex + 1;
+          // Mark this step as naturally completed
+          setCompletedSteps(prev => new Set(prev).add(currentStepIndex));
+
           if (nextIndex < steps.length) {
+            // Single bell for a regular step transition
+            if (audioRef.current) {
+              audioRef.current.currentTime = 0;
+              audioRef.current.play().catch(e => console.error("Bell error:", e));
+            }
             setCurrentStepIndex(nextIndex);
             setTimeout(() => speak(steps[nextIndex].name), 400);
             return steps[nextIndex].duration;
           }
 
+          // Triple bell for end-of-practice
+          playBellTimes(3, 1400);
           setCurrentStepIndex(steps.length);
           setIsActive(false);
-          setTimeout(() => speak("Practice Complete"), 400);
+          setTimeout(() => speak("Practice Complete"), 5000); // after bells finish
           return 0;
         });
       }, 1000);
@@ -103,7 +130,7 @@ const App: React.FC = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, currentStepIndex, isCompleted, speak, steps]);
+  }, [isActive, currentStepIndex, isCompleted, speak, steps, playBellTimes]);
   
   useEffect(() => {
     return () => window.speechSynthesis.cancel();
@@ -135,6 +162,7 @@ const App: React.FC = () => {
       setTimeLeft(steps[0]?.duration ?? 0);
       setIsActive(false);
       setIsStarted(false);
+      setCompletedSteps(new Set());
     } else {
       setTimeLeft(steps[currentStepIndex].duration);
       setIsActive(true);
@@ -177,7 +205,7 @@ const App: React.FC = () => {
   }
 
   const completionMessage = (
-    <div className="text-center h-80 md:h-96 flex flex-col items-center justify-center">
+    <div className="text-center h-56 sm:h-72 md:h-80 lg:h-96 flex flex-col items-center justify-center">
       <p className="font-cormorant text-4xl mb-3 animate-diya-flicker" style={{ color: '#FFD700' }}>ॐ</p>
       <h2 className="font-cinzel text-3xl font-semibold tracking-widest"
           style={{ color: '#FBBF24', textShadow: '0 0 20px rgba(251,191,36,0.5)' }}>
@@ -191,10 +219,10 @@ const App: React.FC = () => {
 
   return (
     <div
-      className="text-white min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 animate-breathing-bg animate-fade-in"
+      className="text-white min-h-screen flex flex-col items-center p-4 sm:p-6 pt-6 pb-10 lg:justify-center lg:p-8 animate-breathing-bg animate-fade-in"
       style={{ backgroundColor: '#0D0520', fontFamily: "'Cormorant Garamond', serif" }}
     >
-      <main className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16">
+      <main className="w-full max-w-5xl flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-8 lg:gap-16">
 
         <div className="flex flex-col items-center">
           {isCompleted ? completionMessage : (
@@ -218,7 +246,7 @@ const App: React.FC = () => {
           />
         </div>
 
-        <div className="w-full max-w-md lg:max-w-sm">
+        <div className="w-full max-w-md lg:max-w-sm flex-shrink-0">
           {/* Section header with ornate divider */}
           <div className="flex items-center mb-5">
             <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(184,134,11,0.5))' }} />
@@ -229,7 +257,8 @@ const App: React.FC = () => {
             <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, rgba(184,134,11,0.5))' }} />
           </div>
 
-          <ul className="space-y-3">
+          <ul className="space-y-2 sm:space-y-3 max-h-[42vh] lg:max-h-none overflow-y-auto pr-1"
+              style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(184,134,11,0.3) transparent' }}>
             {steps.map((step, index) => (
               <StepListItem
                 key={`${step.name}-${index}`}
@@ -238,7 +267,7 @@ const App: React.FC = () => {
                 duration={step.duration}
                 canSelect={true}
                 isActive={!isCompleted && index === currentStepIndex}
-                isCompleted={index < currentStepIndex}
+                isCompleted={completedSteps.has(index)}
                 onUpdateDuration={handleUpdateStepDuration}
                 onSelect={handleSelectStartStep}
               />

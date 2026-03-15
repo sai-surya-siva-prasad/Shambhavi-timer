@@ -43,7 +43,7 @@ const Timer: React.FC<TimerProps> = ({ timeLeft, totalDuration, stepName, stepDe
   });
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-80 h-80 md:w-96 md:h-96">
+    <div className="relative flex flex-col items-center justify-center w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96">
 
       {/* Outermost decorative mandala ring — slow spin */}
       <div className="absolute inset-0 animate-mandala-rotate" style={{ top: '-12px', left: '-12px', right: '-12px', bottom: '-12px', width: 'calc(100% + 24px)', height: 'calc(100% + 24px)' }}>
@@ -124,18 +124,18 @@ const Timer: React.FC<TimerProps> = ({ timeLeft, totalDuration, stepName, stepDe
       {/* Text content */}
       <div className="relative z-10 text-center flex flex-col justify-center items-center w-full px-8">
         <h2
-          className="font-cinzel text-base md:text-lg font-semibold uppercase tracking-widest leading-tight break-words min-h-[56px] flex items-center justify-center"
+          className="font-cinzel text-xs sm:text-sm md:text-base font-semibold uppercase tracking-widest leading-tight break-words min-h-[40px] sm:min-h-[56px] flex items-center justify-center"
           style={{ color: '#FBBF24', textShadow: '0 0 12px rgba(251,191,36,0.4)' }}
         >
           {stepName}
         </h2>
         <p
-          className="font-cormorant text-6xl md:text-7xl font-light tabular-nums my-2 tracking-tighter"
+          className="font-cormorant text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tabular-nums my-1 sm:my-2 tracking-tighter"
           style={{ color: '#FFF8E7', textShadow: '0 0 20px rgba(255,200,50,0.2)' }}
         >
           {formatTime(timeLeft)}
         </p>
-        <p className="font-cormorant text-base italic" style={{ color: 'rgba(251,191,36,0.55)' }}>
+        <p className="font-cormorant text-xs sm:text-sm md:text-base italic" style={{ color: 'rgba(251,191,36,0.55)' }}>
           {stepDescription}
         </p>
       </div>
