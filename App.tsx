@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { MeditationStep } from './types';
-import { MEDITATION_STEPS as DEFAULT_MEDITATION_STEPS, BELL_SOUND_B64 } from './constants';
+import { MEDITATION_STEPS as DEFAULT_MEDITATION_STEPS } from './constants';
 import Timer from './components/Timer';
 import StepListItem from './components/StepListItem';
 import Controls from './components/Controls';
@@ -32,8 +32,46 @@ const App: React.FC = () => {
     () => localStorage.getItem('voice-enabled') !== 'false'
   );
 
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
   const intervalRef = useRef<number | null>(null);
+
+  const getAudioCtx = useCallback((): AudioContext => {
+    if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+      const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioCtxRef.current = new AC();
+    }
+    return audioCtxRef.current;
+  }, []);
+
+  /** Synthesise a single Tingsha bell strike. */
+  const ringTingsha = useCallback(() => {
+    try {
+      const ctx = getAudioCtx();
+      if (ctx.state === 'suspended') void ctx.resume();
+      const now = ctx.currentTime;
+      // Fundamental ~2090 Hz + harmonics + one inharmonic partial for metallic colour
+      const partials: { freq: number; gain: number; decay: number }[] = [
+        { freq: 2090, gain: 0.40, decay: 4.0 },
+        { freq: 4180, gain: 0.20, decay: 3.0 },
+        { freq: 6270, gain: 0.10, decay: 2.2 },
+        { freq: 3135, gain: 0.14, decay: 2.8 }, // inharmonic partial
+      ];
+      partials.forEach(({ freq, gain, decay }) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.connect(g);
+        g.connect(ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        g.gain.setValueAtTime(gain, now);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + decay);
+        osc.start(now);
+        osc.stop(now + decay);
+      });
+    } catch (e) {
+      console.error('Tingsha error:', e);
+    }
+  }, [getAudioCtx]);
   const voiceEnabledRef = useRef(voiceEnabled);
   useEffect(() => { voiceEnabledRef.current = voiceEnabled; }, [voiceEnabled]);
 
@@ -81,18 +119,15 @@ const App: React.FC = () => {
     setEditingStepIndex(null);
   }, []);
 
-  /** Play the bell sound `count` times, `gapMs` apart. */
+  /** Play the Tingsha bell `count` times, `gapMs` apart. */
   const playBellTimes = useCallback((count: number, gapMs = 1400) => {
     const ring = (remaining: number) => {
-      if (remaining <= 0 || !audioRef.current) return;
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(e => console.error('Bell error:', e));
-      if (remaining > 1) {
-        setTimeout(() => ring(remaining - 1), gapMs);
-      }
+      if (remaining <= 0) return;
+      ringTingsha();
+      if (remaining > 1) setTimeout(() => ring(remaining - 1), gapMs);
     };
     ring(count);
-  }, []);
+  }, [ringTingsha]);
 
   const speak = useCallback((text: string) => {
     if (!voiceEnabledRef.current) return;
@@ -163,10 +198,7 @@ const App: React.FC = () => {
           setCompletedSteps(prev => new Set(prev).add(currentStepIndex));
 
           if (nextIndex < steps.length) {
-            if (audioRef.current) {
-              audioRef.current.currentTime = 0;
-              audioRef.current.play().catch(e => console.error("Bell error:", e));
-            }
+            ringTingsha();
             setCurrentStepIndex(nextIndex);
             setTimeout(() => speak(steps[nextIndex].name), 400);
             return steps[nextIndex].duration;
@@ -186,7 +218,7 @@ const App: React.FC = () => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isActive, currentStepIndex, isCompleted, speak, steps, playBellTimes]);
+  }, [isActive, currentStepIndex, isCompleted, speak, steps, playBellTimes, ringTingsha]);
 
   useEffect(() => {
     return () => window.speechSynthesis.cancel();
@@ -391,7 +423,6 @@ const App: React.FC = () => {
         </ul>
       </main>
 
-      <audio ref={audioRef} src={BELL_SOUND_B64} preload="auto" />
     </div>
   );
 };
