@@ -45,16 +45,14 @@ const App: React.FC = () => {
 
   /** Synthesise a single Tingsha bell strike. */
   const ringTingsha = useCallback(() => {
-    try {
-      const ctx = getAudioCtx();
-      if (ctx.state === 'suspended') void ctx.resume();
+    const ctx = getAudioCtx();
+    const schedule = () => {
       const now = ctx.currentTime;
-      // Fundamental ~2090 Hz + harmonics + one inharmonic partial for metallic colour
       const partials: { freq: number; gain: number; decay: number }[] = [
         { freq: 2090, gain: 0.40, decay: 4.0 },
         { freq: 4180, gain: 0.20, decay: 3.0 },
         { freq: 6270, gain: 0.10, decay: 2.2 },
-        { freq: 3135, gain: 0.14, decay: 2.8 }, // inharmonic partial
+        { freq: 3135, gain: 0.14, decay: 2.8 },
       ];
       partials.forEach(({ freq, gain, decay }) => {
         const osc = ctx.createOscillator();
@@ -68,8 +66,11 @@ const App: React.FC = () => {
         osc.start(now);
         osc.stop(now + decay);
       });
-    } catch (e) {
-      console.error('Tingsha error:', e);
+    };
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(schedule).catch(e => console.error('Tingsha resume error:', e));
+    } else {
+      try { schedule(); } catch (e) { console.error('Tingsha error:', e); }
     }
   }, [getAudioCtx]);
   const voiceEnabledRef = useRef(voiceEnabled);
