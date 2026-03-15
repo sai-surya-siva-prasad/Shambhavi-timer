@@ -52,7 +52,7 @@ const StepListItem: React.FC<StepListItemProps> = ({
   index, name, duration, canSelect, isActive, isCompleted,
   onEdit, onSelect,
 }) => {
-  const isEditable = !isActive && !isCompleted;
+  const isEditable = !isCompleted;
 
   const nameColor = isCompleted ? 'rgba(184,134,11,0.5)' : isActive ? '#FFF8E7' : 'rgba(255,230,150,0.75)';
   const durationColor = isCompleted ? 'rgba(184,134,11,0.35)' : isActive ? '#FBBF24' : 'rgba(184,134,11,0.55)';

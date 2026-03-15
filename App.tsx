@@ -59,8 +59,8 @@ const App: React.FC = () => {
     setSteps(currentSteps => {
       const updatedSteps = [...currentSteps];
       updatedSteps[index] = { ...updatedSteps[index], duration: newDurationInSeconds };
-      if (index === currentStepIndex && !isActive) {
-        setTimeLeft(newDurationInSeconds);
+      if (index === currentStepIndex) {
+        setTimeLeft(prev => Math.min(prev, newDurationInSeconds));
       }
       return updatedSteps;
     });
