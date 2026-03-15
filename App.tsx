@@ -26,6 +26,8 @@ const App: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(steps[0]?.duration ?? 0);
   const [isActive, setIsActive] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
+  // Only steps whose timer ran to zero — manual navigation does NOT mark steps complete
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   
   const audioRef = useRef<HTMLAudioElement>(null);
   // FIX: In browser environments, setInterval returns a number, not a NodeJS.Timeout object.
@@ -75,6 +77,12 @@ const App: React.FC = () => {
 
     setCurrentStepIndex(index);
     setTimeLeft(steps[index].duration);
+    // Un-complete any steps from this index onward (user is re-doing them)
+    setCompletedSteps(prev => {
+      const next = new Set(prev);
+      for (let i = index; i < steps.length; i++) next.delete(i);
+      return next;
+    });
     if (isActive) {
       setIsActive(false);
     }
@@ -89,6 +97,9 @@ const App: React.FC = () => {
           }
           
           const nextIndex = currentStepIndex + 1;
+          // Mark this step as naturally completed
+          setCompletedSteps(prev => new Set(prev).add(currentStepIndex));
+
           if (nextIndex < steps.length) {
             // Single bell for a regular step transition
             if (audioRef.current) {
@@ -151,6 +162,7 @@ const App: React.FC = () => {
       setTimeLeft(steps[0]?.duration ?? 0);
       setIsActive(false);
       setIsStarted(false);
+      setCompletedSteps(new Set());
     } else {
       setTimeLeft(steps[currentStepIndex].duration);
       setIsActive(true);
@@ -254,7 +266,7 @@ const App: React.FC = () => {
                 duration={step.duration}
                 canSelect={true}
                 isActive={!isCompleted && index === currentStepIndex}
-                isCompleted={index < currentStepIndex}
+                isCompleted={completedSteps.has(index)}
                 onUpdateDuration={handleUpdateStepDuration}
                 onSelect={handleSelectStartStep}
               />
