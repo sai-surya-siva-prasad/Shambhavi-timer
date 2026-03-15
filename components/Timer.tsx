@@ -4,7 +4,6 @@ interface TimerProps {
   timeLeft: number;
   totalDuration: number;
   stepName: string;
-  stepDescription: string;
 }
 
 const formatTime = (seconds: number): string => {
@@ -13,89 +12,59 @@ const formatTime = (seconds: number): string => {
   return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-const Timer: React.FC<TimerProps> = ({ timeLeft, totalDuration, stepName, stepDescription }) => {
-  const radius = 140;
-  const strokeWidth = 12;
-  const viewBoxSize = 320;
+const Timer: React.FC<TimerProps> = ({ timeLeft, totalDuration, stepName }) => {
+  const radius = 130;
+  const strokeWidth = 10;
+  const viewBoxSize = 300;
   const center = viewBoxSize / 2;
   const circumference = 2 * Math.PI * radius;
 
   const progress = totalDuration > 0 ? (totalDuration - timeLeft) / totalDuration : 0;
   const strokeDashoffset = circumference * (1 - progress);
 
-  // Decorative outer mandala ring: 24 small dashes evenly spaced
-  const outerRingDots = Array.from({ length: 24 }, (_, i) => {
-    const angle = (i * 15 - 90) * (Math.PI / 180);
-    const r = 155;
-    const x = center + r * Math.cos(angle);
-    const y = center + r * Math.sin(angle);
-    const isAccent = i % 3 === 0;
-    return (
-      <circle
-        key={i}
-        cx={x}
-        cy={y}
-        r={isAccent ? 2.5 : 1.5}
-        fill={isAccent ? '#FFD700' : '#B8860B'}
-        opacity={isAccent ? 0.7 : 0.4}
-      />
-    );
-  });
-
   return (
-    <div className="relative flex flex-col items-center justify-center w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-96 lg:h-96">
+    <div className="relative flex flex-col items-center justify-center"
+         style={{ width: 'min(72vw, 300px)', height: 'min(72vw, 300px)' }}>
 
-      {/* Outermost decorative mandala ring — slow spin */}
-      <div className="absolute inset-0 animate-mandala-rotate" style={{ top: '-12px', left: '-12px', right: '-12px', bottom: '-12px', width: 'calc(100% + 24px)', height: 'calc(100% + 24px)' }}>
-        <svg className="w-full h-full" viewBox="0 0 344 344">
+      {/* Outer decorative ring — slow spin */}
+      <div
+        className="absolute animate-mandala-rotate"
+        style={{ inset: '-14px', width: 'calc(100% + 28px)', height: 'calc(100% + 28px)' }}
+      >
+        <svg className="w-full h-full" viewBox="0 0 328 328">
           {Array.from({ length: 24 }, (_, i) => {
             const angle = (i * 15 - 90) * (Math.PI / 180);
-            const r = 165;
-            const x = 172 + r * Math.cos(angle);
-            const y = 172 + r * Math.sin(angle);
+            const r = 158;
+            const x = 164 + r * Math.cos(angle);
+            const y = 164 + r * Math.sin(angle);
             const isAccent = i % 3 === 0;
             return (
               <circle
                 key={i}
-                cx={x}
-                cy={y}
-                r={isAccent ? 3 : 1.8}
+                cx={x} cy={y}
+                r={isAccent ? 2.5 : 1.5}
                 fill={isAccent ? '#FFD700' : '#B8860B'}
-                opacity={isAccent ? 0.6 : 0.35}
+                opacity={isAccent ? 0.55 : 0.3}
               />
             );
           })}
         </svg>
       </div>
 
-      {/* SVG rings with golden glow */}
+      {/* Progress rings */}
       <div className="absolute inset-0 animate-golden-glow">
         <svg className="w-full h-full" viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}>
-          {/* Background track — deep maroon/indigo ring */}
+          {/* Background track */}
+          <circle cx={center} cy={center} r={radius} strokeWidth={strokeWidth} stroke="#2D1445" fill="transparent" />
+          {/* Thin gold dashed ring */}
           <circle
-            cx={center}
-            cy={center}
-            r={radius}
-            strokeWidth={strokeWidth}
-            stroke="#2D1445"
-            fill="transparent"
+            cx={center} cy={center} r={radius + 8}
+            strokeWidth={1} stroke="#B8860B" fill="transparent"
+            strokeDasharray="5 5" opacity="0.45"
           />
-          {/* Secondary decorative ring — thin gold */}
+          {/* Progress arc */}
           <circle
-            cx={center}
-            cy={center}
-            r={radius + 8}
-            strokeWidth={1}
-            stroke="#B8860B"
-            fill="transparent"
-            strokeDasharray="6 6"
-            opacity="0.5"
-          />
-          {/* Progress ring — saffron-gold gradient via stroke */}
-          <circle
-            cx={center}
-            cy={center}
-            r={radius}
+            cx={center} cy={center} r={radius}
             strokeWidth={strokeWidth}
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
@@ -108,35 +77,42 @@ const Timer: React.FC<TimerProps> = ({ timeLeft, totalDuration, stepName, stepDe
         </svg>
       </div>
 
-      {/* Inner glass-like circle — deep indigo with gold border */}
+      {/* Inner circle backdrop */}
       <div
-        className="absolute rounded-full backdrop-blur-sm"
+        className="absolute rounded-full"
         style={{
-          width: '78%',
-          height: '78%',
-          top: '11%',
-          left: '11%',
-          backgroundColor: 'rgba(13, 5, 32, 0.65)',
-          border: '1px solid rgba(218,165,32,0.25)',
+          width: '76%', height: '76%',
+          top: '12%', left: '12%',
+          backgroundColor: 'rgba(13, 5, 32, 0.7)',
+          border: '1px solid rgba(218,165,32,0.2)',
         }}
       />
 
-      {/* Text content */}
-      <div className="relative z-10 text-center flex flex-col justify-center items-center w-full px-8">
+      {/* Text */}
+      <div className="relative z-10 text-center flex flex-col items-center justify-center gap-1 px-4">
         <h2
-          className="font-cinzel text-xs sm:text-sm md:text-base font-semibold uppercase tracking-widest leading-tight break-words min-h-[40px] sm:min-h-[56px] flex items-center justify-center"
-          style={{ color: '#FBBF24', textShadow: '0 0 12px rgba(251,191,36,0.4)' }}
+          className="font-cinzel font-semibold uppercase tracking-widest leading-tight"
+          style={{
+            fontSize: 'clamp(0.6rem, 2.5vw, 0.85rem)',
+            color: '#FBBF24',
+            textShadow: '0 0 10px rgba(251,191,36,0.4)',
+            maxWidth: '80%',
+            wordBreak: 'break-word',
+            minHeight: '1.5em',
+          }}
         >
           {stepName}
         </h2>
         <p
-          className="font-cormorant text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-light tabular-nums my-1 sm:my-2 tracking-tighter"
-          style={{ color: '#FFF8E7', textShadow: '0 0 20px rgba(255,200,50,0.2)' }}
+          className="font-cormorant font-light tabular-nums tracking-tighter"
+          style={{
+            fontSize: 'clamp(2rem, 11vw, 3.5rem)',
+            color: '#FFF8E7',
+            textShadow: '0 0 16px rgba(255,200,50,0.2)',
+            lineHeight: 1,
+          }}
         >
           {formatTime(timeLeft)}
-        </p>
-        <p className="font-cormorant text-xs sm:text-sm md:text-base italic" style={{ color: 'rgba(251,191,36,0.55)' }}>
-          {stepDescription}
         </p>
       </div>
     </div>
