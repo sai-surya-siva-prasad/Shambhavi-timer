@@ -28,9 +28,23 @@ const App: React.FC = () => {
   const [isStarted, setIsStarted] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
   const [editingStepIndex, setEditingStepIndex] = useState<number | null>(null);
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(
+    () => localStorage.getItem('voice-enabled') !== 'false'
+  );
 
   const audioRef = useRef<HTMLAudioElement>(null);
   const intervalRef = useRef<number | null>(null);
+  const voiceEnabledRef = useRef(voiceEnabled);
+  useEffect(() => { voiceEnabledRef.current = voiceEnabled; }, [voiceEnabled]);
+
+  const toggleVoice = useCallback(() => {
+    setVoiceEnabled(prev => {
+      const next = !prev;
+      localStorage.setItem('voice-enabled', String(next));
+      if (!next) window.speechSynthesis.cancel();
+      return next;
+    });
+  }, []);
 
   const totalDuration = steps[currentStepIndex]?.duration || 0;
   const currentStep = steps[currentStepIndex];
@@ -81,6 +95,7 @@ const App: React.FC = () => {
   }, []);
 
   const speak = useCallback((text: string) => {
+    if (!voiceEnabledRef.current) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-IN';
@@ -263,6 +278,38 @@ const App: React.FC = () => {
         className="w-full flex flex-col items-center gap-6 px-4 pt-6 pb-8"
         style={{ maxWidth: '480px', margin: '0 auto' }}
       >
+        {/* Voice toggle */}
+        <div className="w-full flex justify-end">
+          <button
+            onClick={toggleVoice}
+            aria-label={voiceEnabled ? 'Turn off voice' : 'Turn on voice'}
+            title={voiceEnabled ? 'Voice on' : 'Voice off'}
+            className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all active:scale-95"
+            style={{
+              backgroundColor: voiceEnabled ? 'rgba(45,20,69,0.7)' : 'rgba(26,11,56,0.5)',
+              border: `1px solid ${voiceEnabled ? 'rgba(218,165,32,0.4)' : 'rgba(100,60,150,0.35)'}`,
+              color: voiceEnabled ? '#FBBF24' : 'rgba(184,134,11,0.35)',
+            }}
+          >
+            {voiceEnabled ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                  d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                  clipRule="evenodd" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+              </svg>
+            )}
+            <span className="font-cinzel text-xs tracking-widest">
+              {voiceEnabled ? 'Voice' : 'Muted'}
+            </span>
+          </button>
+        </div>
+
         {/* Timer or Completion */}
         <div className="flex flex-col items-center w-full">
           {isCompleted ? completionMessage : (
