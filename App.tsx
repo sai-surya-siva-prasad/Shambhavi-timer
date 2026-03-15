@@ -145,6 +145,14 @@ const App: React.FC = () => {
     }
   }, [isActive, steps, speak, playBellTimes]);
 
+  const handleResetToDefaults = useCallback(() => {
+    setSteps(DEFAULT_MEDITATION_STEPS.map((s) => ({ ...s, enabled: getStepEnabled(s) })));
+    setCurrentStepIndex(0);
+    setTimeLeft(DEFAULT_MEDITATION_STEPS[0].duration);
+    setIsActive(false);
+    setCompletedSteps(new Set());
+  }, []);
+
   useEffect(() => {
     if (isActive && !isCompleted) {
       intervalRef.current = setInterval(() => {
@@ -348,6 +356,21 @@ const App: React.FC = () => {
             SEQUENCE
           </span>
           <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, rgba(184,134,11,0.4))' }} />
+        </div>
+
+        {/* Reset to defaults */}
+        <div className="w-full flex justify-end">
+          <button
+            onClick={handleResetToDefaults}
+            className="font-cinzel text-xs tracking-widest px-3 py-1 rounded border"
+            style={{
+              color: 'rgba(251,191,36,0.7)',
+              borderColor: 'rgba(184,134,11,0.35)',
+              background: 'rgba(0,0,0,0.25)',
+            }}
+          >
+            Reset to Defaults
+          </button>
         </div>
 
         {/* Step list — full height, page scrolls */}
