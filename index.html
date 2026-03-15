@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Shambhavi Mahamudra Kriya Timer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -103,6 +103,24 @@
     /* ── Ornate border helper ── */
     .border-ornate {
         border-image: linear-gradient(90deg, transparent, #B8860B, #FFD700, #B8860B, transparent) 1;
+    }
+
+    /* ── Mobile touch & scroll ── */
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { -webkit-overflow-scrolling: touch; overscroll-behavior: none; }
+
+    /* Prevent input zoom on iOS */
+    input[type="number"], input[type="text"] { font-size: 16px !important; }
+
+    /* Modal overlay */
+    .modal-overlay {
+        position: fixed; inset: 0; z-index: 50;
+        background: rgba(8, 3, 20, 0.82);
+        display: flex; align-items: center; justify-content: center;
+        padding: 1rem;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
     }
 </style>
 </head>

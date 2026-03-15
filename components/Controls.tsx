@@ -60,7 +60,7 @@ const Controls: React.FC<ControlsProps> = ({
   const skipHoverStyle = { backgroundColor: '#3D1A6E' };
 
   return (
-    <div className="flex flex-col items-center space-y-3 mt-4 sm:mt-6">
+    <div className="flex flex-col items-center space-y-3">
       <div className="flex items-center space-x-3 sm:space-x-4">
 
         {isStarted && (
