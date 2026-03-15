@@ -46,10 +46,10 @@ const OrnateDivider = () => (
 const HomeScreen: React.FC<HomeScreenProps> = ({ onBegin }) => {
   return (
     <div
-      className="text-white min-h-screen flex flex-col items-center justify-center p-4 text-center animate-breathing-bg"
+      className="text-white min-h-screen flex flex-col items-center justify-center p-4 py-10 text-center animate-breathing-bg"
       style={{ backgroundColor: '#0D0520' }}
     >
-      <main className="flex flex-col items-center animate-fade-in-slow">
+      <main className="flex flex-col items-center animate-fade-in-slow w-full max-w-sm sm:max-w-md">
 
         {/* Sacred Om header */}
         <p className="font-cormorant text-amber-400/60 text-2xl tracking-[0.3em] mb-2 animate-text-shimmer">
@@ -59,7 +59,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onBegin }) => {
         <OmSymbol />
 
         {/* Title */}
-        <h1 className="font-cinzel text-3xl md:text-4xl font-semibold tracking-widest"
+        <h1 className="font-cinzel text-2xl sm:text-3xl md:text-4xl font-semibold tracking-widest"
             style={{ color: '#FFD700', textShadow: '0 0 24px rgba(255,165,0,0.4)' }}>
           Shambhavi Mahamudra
         </h1>
@@ -78,7 +78,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onBegin }) => {
         {/* Begin button — saffron / golden */}
         <button
           onClick={onBegin}
-          className="mt-10 px-10 py-4 font-cinzel font-semibold text-lg tracking-widest rounded-full
+          className="mt-8 px-8 sm:px-10 py-3 sm:py-4 font-cinzel font-semibold text-base sm:text-lg tracking-widest rounded-full
                      flex items-center justify-center
                      transition-all duration-300 transform hover:scale-105 focus:outline-none
                      focus:ring-2 focus:ring-amber-400 focus:ring-opacity-75"

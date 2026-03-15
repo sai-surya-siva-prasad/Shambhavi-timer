@@ -205,7 +205,7 @@ const App: React.FC = () => {
   }
 
   const completionMessage = (
-    <div className="text-center h-80 md:h-96 flex flex-col items-center justify-center">
+    <div className="text-center h-56 sm:h-72 md:h-80 lg:h-96 flex flex-col items-center justify-center">
       <p className="font-cormorant text-4xl mb-3 animate-diya-flicker" style={{ color: '#FFD700' }}>ॐ</p>
       <h2 className="font-cinzel text-3xl font-semibold tracking-widest"
           style={{ color: '#FBBF24', textShadow: '0 0 20px rgba(251,191,36,0.5)' }}>
@@ -219,10 +219,10 @@ const App: React.FC = () => {
 
   return (
     <div
-      className="text-white min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 animate-breathing-bg animate-fade-in"
+      className="text-white min-h-screen flex flex-col items-center p-4 sm:p-6 pt-6 pb-10 lg:justify-center lg:p-8 animate-breathing-bg animate-fade-in"
       style={{ backgroundColor: '#0D0520', fontFamily: "'Cormorant Garamond', serif" }}
     >
-      <main className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16">
+      <main className="w-full max-w-5xl flex flex-col lg:flex-row items-center justify-center gap-6 sm:gap-8 lg:gap-16">
 
         <div className="flex flex-col items-center">
           {isCompleted ? completionMessage : (
@@ -246,7 +246,7 @@ const App: React.FC = () => {
           />
         </div>
 
-        <div className="w-full max-w-md lg:max-w-sm">
+        <div className="w-full max-w-md lg:max-w-sm flex-shrink-0">
           {/* Section header with ornate divider */}
           <div className="flex items-center mb-5">
             <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(184,134,11,0.5))' }} />
@@ -257,7 +257,8 @@ const App: React.FC = () => {
             <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, rgba(184,134,11,0.5))' }} />
           </div>
 
-          <ul className="space-y-3">
+          <ul className="space-y-2 sm:space-y-3 max-h-[42vh] lg:max-h-none overflow-y-auto pr-1"
+              style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(184,134,11,0.3) transparent' }}>
             {steps.map((step, index) => (
               <StepListItem
                 key={`${step.name}-${index}`}

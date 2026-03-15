@@ -51,7 +51,7 @@ const Controls: React.FC<ControlsProps> = ({
   const baseBtn = "transition-transform transform focus:outline-none focus:ring-2 focus:ring-opacity-75 disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none";
 
   /** Skip buttons: deep maroon with gold border */
-  const skipBtn = `${baseBtn} w-12 h-12 rounded-full flex items-center justify-center hover:scale-105 focus:ring-amber-400`;
+  const skipBtn = `${baseBtn} w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center hover:scale-105 focus:ring-amber-400`;
   const skipStyle = {
     backgroundColor: '#2D1445',
     border: '1px solid rgba(184,134,11,0.5)',
@@ -60,8 +60,8 @@ const Controls: React.FC<ControlsProps> = ({
   const skipHoverStyle = { backgroundColor: '#3D1A6E' };
 
   return (
-    <div className="flex flex-col items-center space-y-4 mt-8">
-      <div className="flex items-center space-x-4">
+    <div className="flex flex-col items-center space-y-3 mt-4 sm:mt-6">
+      <div className="flex items-center space-x-3 sm:space-x-4">
 
         {isStarted && (
           <button
@@ -81,7 +81,7 @@ const Controls: React.FC<ControlsProps> = ({
         <button
           onClick={onStartPause}
           disabled={!hasAnySteps}
-          className={`${baseBtn} w-40 px-6 py-3 font-cinzel font-semibold rounded-full shadow-lg flex items-center justify-center text-sm tracking-wider hover:scale-105 focus:ring-amber-400`}
+          className={`${baseBtn} w-36 sm:w-40 px-5 sm:px-6 py-3 font-cinzel font-semibold rounded-full shadow-lg flex items-center justify-center text-sm tracking-wider hover:scale-105 focus:ring-amber-400`}
           style={{
             background: 'linear-gradient(135deg, #B8860B 0%, #DAA520 40%, #FF8C00 100%)',
             color: '#1A0B38',

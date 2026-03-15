@@ -89,7 +89,6 @@ const StepListItem: React.FC<StepListItemProps> = ({
     ...baseStyle,
     backgroundColor: 'rgba(45, 20, 69, 0.75)',
     borderLeftColor: '#FBBF24',
-    transform: 'scale(1.03)',
     boxShadow: '0 4px 20px rgba(251,191,36,0.2)',
   };
 
@@ -178,7 +177,7 @@ const StepListItem: React.FC<StepListItemProps> = ({
             title="Edit duration (in minutes)"
           >
             <EditIcon />
-            <span className="text-xs font-cormorant">edit</span>
+            <span className="hidden sm:inline text-xs font-cormorant">edit</span>
           </button>
         )}
       </div>
