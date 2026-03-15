@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Shambhavi Mahamudra Kriya Timer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
   <script type="importmap">
 {
@@ -15,37 +18,95 @@
 }
 </script>
 <style>
+    /* ── Fonts ── */
+    .font-cinzel { font-family: 'Cinzel', serif; }
+    .font-cormorant { font-family: 'Cormorant Garamond', serif; }
+
+    /* ── Sacred breathing background: deep midnight indigo ── */
     @keyframes breathing-bg {
-        0%, 100% { background-color: #0d1421; }
-        50% { background-color: #111827; }
+        0%, 100% { background-color: #0D0520; }
+        50%       { background-color: #150930; }
     }
     .animate-breathing-bg {
         animation: breathing-bg 10s ease-in-out infinite;
     }
+
+    /* ── Fade animations ── */
     @keyframes fade-in {
         from { opacity: 0; }
-        to { opacity: 1; }
+        to   { opacity: 1; }
     }
     .animate-fade-in {
         animation: fade-in 1s ease-out forwards;
     }
+
     @keyframes fade-in-slow {
         from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        to   { opacity: 1; transform: translateY(0); }
     }
     .animate-fade-in-slow {
         animation: fade-in-slow 1.5s ease-out forwards;
     }
+
+    /* ── Lotus / icon pulse ── */
     @keyframes subtle-pulse {
-        0%, 100% { transform: scale(1); opacity: 0.8; }
-        50% { transform: scale(1.03); opacity: 1; }
+        0%, 100% { transform: scale(1);    opacity: 0.85; }
+        50%       { transform: scale(1.04); opacity: 1; }
     }
     .animate-subtle-pulse {
         animation: subtle-pulse 4s ease-in-out infinite;
     }
+
+    /* ── Mandala slow spin for decorative outer ring ── */
+    @keyframes mandala-rotate {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+    .animate-mandala-rotate {
+        animation: mandala-rotate 60s linear infinite;
+        transform-origin: center;
+    }
+    .animate-mandala-rotate-reverse {
+        animation: mandala-rotate 45s linear infinite reverse;
+        transform-origin: center;
+    }
+
+    /* ── Diya / flame flicker ── */
+    @keyframes diya-flicker {
+        0%, 100% { opacity: 1;    transform: scale(1)    scaleY(1); }
+        25%       { opacity: 0.9; transform: scale(1.02) scaleY(1.03); }
+        50%       { opacity: 0.95; transform: scale(0.98) scaleY(0.97); }
+        75%       { opacity: 1;    transform: scale(1.01) scaleY(1.02); }
+    }
+    .animate-diya-flicker {
+        animation: diya-flicker 2.5s ease-in-out infinite;
+    }
+
+    /* ── Golden glow pulse on progress ring ── */
+    @keyframes golden-glow-pulse {
+        0%, 100% { filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.35)); }
+        50%       { filter: drop-shadow(0 0 22px rgba(251, 191, 36, 0.65)); }
+    }
+    .animate-golden-glow {
+        animation: golden-glow-pulse 3s ease-in-out infinite;
+    }
+
+    /* ── Shimmer for text ── */
+    @keyframes text-shimmer {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.75; }
+    }
+    .animate-text-shimmer {
+        animation: text-shimmer 4s ease-in-out infinite;
+    }
+
+    /* ── Ornate border helper ── */
+    .border-ornate {
+        border-image: linear-gradient(90deg, transparent, #B8860B, #FFD700, #B8860B, transparent) 1;
+    }
 </style>
 </head>
-  <body class="bg-gray-900 min-h-screen m-0">
+  <body class="bg-[#0D0520] min-h-screen m-0">
     <div id="root" class="min-h-screen"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

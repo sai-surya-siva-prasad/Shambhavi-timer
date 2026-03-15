@@ -178,64 +178,87 @@ const App: React.FC = () => {
 
   const completionMessage = (
     <div className="text-center h-80 md:h-96 flex flex-col items-center justify-center">
-        <h2 className="text-3xl font-bold text-cyan-300">Practice Complete</h2>
-        <p className="text-gray-400 mt-2">Well done.</p>
+      <p className="font-cormorant text-4xl mb-3 animate-diya-flicker" style={{ color: '#FFD700' }}>ॐ</p>
+      <h2 className="font-cinzel text-3xl font-semibold tracking-widest"
+          style={{ color: '#FBBF24', textShadow: '0 0 20px rgba(251,191,36,0.5)' }}>
+        Practice Complete
+      </h2>
+      <p className="font-cormorant text-lg italic mt-3" style={{ color: 'rgba(251,191,36,0.55)' }}>
+        Well done. Remain in the stillness.
+      </p>
     </div>
   );
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 font-sans animate-breathing-bg animate-fade-in">
+    <div
+      className="text-white min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 animate-breathing-bg animate-fade-in"
+      style={{ backgroundColor: '#0D0520', fontFamily: "'Cormorant Garamond', serif" }}
+    >
       <main className="container mx-auto flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-16">
-        
+
         <div className="flex flex-col items-center">
-            {isCompleted ? completionMessage : (
-                <Timer
-                    timeLeft={timeLeft}
-                    totalDuration={totalDuration}
-                    stepName={currentStep?.name ?? 'No steps selected'}
-                    stepDescription={currentStep?.description ?? 'Select at least one step to begin.'}
-                />
-            )}
-            <Controls 
-                isActive={isActive}
-                isStarted={isStarted}
-                onStartPause={handleStartPause}
-                onReset={handleReset}
-                onNext={handleNextStep}
-                onPrevious={handlePreviousStep}
-                currentStepIndex={currentStepIndex}
-                totalSteps={steps.length}
-                hasAnySteps={hasAnySteps}
+          {isCompleted ? completionMessage : (
+            <Timer
+              timeLeft={timeLeft}
+              totalDuration={totalDuration}
+              stepName={currentStep?.name ?? 'No steps selected'}
+              stepDescription={currentStep?.description ?? 'Select at least one step to begin.'}
             />
+          )}
+          <Controls
+            isActive={isActive}
+            isStarted={isStarted}
+            onStartPause={handleStartPause}
+            onReset={handleReset}
+            onNext={handleNextStep}
+            onPrevious={handlePreviousStep}
+            currentStepIndex={currentStepIndex}
+            totalSteps={steps.length}
+            hasAnySteps={hasAnySteps}
+          />
         </div>
 
         <div className="w-full max-w-md lg:max-w-sm">
-            <h3 className="text-xl font-semibold mb-4 text-gray-300 tracking-wide text-center lg:text-left">Meditation Sequence</h3>
-            <ul className="space-y-3">
-                {steps.map((step, index) => (
-                    <StepListItem
-                        key={`${step.name}-${index}`}
-                        index={index}
-                        name={step.name}
-                        duration={step.duration}
-                        canSelect={true}
-                        isActive={!isCompleted && index === currentStepIndex}
-                        isCompleted={index < currentStepIndex}
-                        onUpdateDuration={handleUpdateStepDuration}
-                        onSelect={handleSelectStartStep}
-                    />
-                ))}
-            </ul>
-             <div className="mt-4 text-center lg:text-left">
-                <p className="text-xs text-gray-500">
-                    <span className="font-bold text-gray-400">Tip:</span> Click a step to start from there. Click the pencil icon to customize durations.
-                </p>
-            </div>
+          {/* Section header with ornate divider */}
+          <div className="flex items-center mb-5">
+            <div className="flex-1 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(184,134,11,0.5))' }} />
+            <h3 className="font-cinzel text-sm font-semibold tracking-widest mx-4 text-center"
+                style={{ color: 'rgba(251,191,36,0.75)' }}>
+              MEDITATION SEQUENCE
+            </h3>
+            <div className="flex-1 h-px" style={{ background: 'linear-gradient(to left, transparent, rgba(184,134,11,0.5))' }} />
+          </div>
+
+          <ul className="space-y-3">
+            {steps.map((step, index) => (
+              <StepListItem
+                key={`${step.name}-${index}`}
+                index={index}
+                name={step.name}
+                duration={step.duration}
+                canSelect={true}
+                isActive={!isCompleted && index === currentStepIndex}
+                isCompleted={index < currentStepIndex}
+                onUpdateDuration={handleUpdateStepDuration}
+                onSelect={handleSelectStartStep}
+              />
+            ))}
+          </ul>
+
+          <div className="mt-4 text-center lg:text-left">
+            <p className="font-cormorant text-xs italic" style={{ color: 'rgba(184,134,11,0.5)' }}>
+              <span className="not-italic" style={{ color: 'rgba(184,134,11,0.7)' }}>Tip:</span>{' '}
+              Click a step to start from there. Click the pencil icon to customise durations.
+            </p>
+          </div>
         </div>
       </main>
+
       <audio ref={audioRef} src={BELL_SOUND_B64} preload="auto" />
-      <footer className="mt-8 text-center text-gray-500 text-sm">
-        <p>Shambhavi Mahamudra Kriya Timer</p>
+
+      <footer className="mt-8 text-center font-cormorant text-sm tracking-widest"
+              style={{ color: 'rgba(184,134,11,0.4)' }}>
+        <p>ॐ Shambhavi Mahamudra Kriya Timer ॐ</p>
       </footer>
     </div>
   );
